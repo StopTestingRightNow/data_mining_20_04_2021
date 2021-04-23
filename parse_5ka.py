@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import requests
 from urllib.parse import urlparse
+from pymongo import MongoClient
 
 
 class Parse5ka:
@@ -34,7 +35,10 @@ class Parse5ka:
                 yield product
 
     def _save(self, data: dict, file_path: Path):
-        file_path.write_text(json.dumps(data, ensure_ascii=False))
+        client = MongoClient()
+        collection = client.parse_20_04.some_parser
+        collection.insert_one(data)
+        # file_path.write_text(json.dumps(data, ensure_ascii=False))
 
 
 class CategoriesParser(Parse5ka):
