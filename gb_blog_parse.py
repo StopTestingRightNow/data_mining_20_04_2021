@@ -42,9 +42,7 @@ class GbBlogParse:
 
     def task_creator(self, url, tags_list, callback):
         links = set(
-            urljoin(url, itm.attrs.get("href"))
-            for itm in tags_list.find_all("a")
-            if itm.attrs.get("href")
+            urljoin(url, itm.attrs.get("href")) for itm in tags_list if itm.attrs.get("href")
         )
         for link in links:
             task = self.get_task(link, callback)
@@ -59,11 +57,29 @@ class GbBlogParse:
         )
 
     def parse_post(self, url, soup):
-        title_tag = soup.find("h1", attrs={"class": "blogpost-title"})
+        author_tag = soup.find("div", attrs={"itemprop": "author"})
         data = {
-            "url": url,
-            "title": title_tag.text,
+            "post_data": {
+                "title": soup.find("h1", attrs={"class": "blogpost-title"}).text,
+                "url": url,
+                "id": soup.find("comments").attrs.get("commentable-id"),
+            },
+            "author_data": {
+                "url": urljoin(url, author_tag.parent.attrs.get("href")),
+                "name": author_tag.text,
+            },
+            "tags_data": [
+                {"name": tag.text, "url": urljoin(url, tag.attrs.get("href"))}
+                for tag in soup.find_all("a", attrs={"class": "small"})
+            ],
+            "comments_data": self._get_comments(soup.find("comments").attrs.get("commentable-id")),
         }
+        return data
+
+    def _get_comments(self, post_id):
+        api_path = f"/api/v2/comments?commentable_type=Post&commentable_id={post_id}&order=desc"
+        response = self._get_response(urljoin(self.start_url, api_path))
+        data = response.json()
         return data
 
     def run(self):
