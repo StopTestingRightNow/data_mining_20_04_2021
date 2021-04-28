@@ -3,15 +3,16 @@ import typing
 
 import requests
 from urllib.parse import urljoin
-from pymongo import MongoClient
 import bs4
+
+from database.database import Database
 
 
 class GbBlogParse:
-    def __init__(self, start_url, collection):
+    def __init__(self, start_url, db):
         self.time = time.time()
         self.start_url = start_url
-        self.collection = collection
+        self.db = db
         self.done_urls = set()
         self.tasks = []
         start_task = self.get_task(self.start_url, self.parse_feed)
@@ -89,10 +90,11 @@ class GbBlogParse:
                 self.save(task_result)
 
     def save(self, data):
-        self.collection.insert_one(data)
+        self.db.add_post(data)
 
 
 if __name__ == "__main__":
-    collection = MongoClient()["gb_parse_20_04"]["gb_blog"]
-    parser = GbBlogParse("https://gb.ru/posts", collection)
+    # collection = MongoClient()["gb_parse_20_04"]["gb_blog"]
+    db = Database("sqlite:///gb_blog.db")
+    parser = GbBlogParse("https://gb.ru/posts", db)
     parser.run()
