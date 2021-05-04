@@ -38,6 +38,13 @@ class Post(Base, UrlMixin):
 
 class Author(Base, UrlMixin):
     __tablename__ = "author"
+
+    def __hash__(self):
+        return self.id
+
+    def __eq__(self, other):
+        return self.id == other.id
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(150), nullable=False)
 

@@ -15,12 +15,13 @@ class Database:
         instance = session.query(model).filter_by(**{filter_field: data[filter_field]}).first()
         if not instance:
             instance = model(**data)
-        return instance
+            return instance, False
+        return instance, True
 
     def add_comments(self, session, data):
         result = []
         for comment in data:
-            author = self._get_or_create(
+            author, author_found = self._get_or_create(
                 session,
                 models.Author,
                 "id",
@@ -28,7 +29,7 @@ class Database:
                 url=comment["comment"]["user"]["url"],
                 id=comment["comment"]["user"]["id"],
             )
-            comment_db = self._get_or_create(
+            comment_db, _ = self._get_or_create(
                 session, models.Comment, "id", **comment["comment"], author=author,
             )
             result.append(comment_db)
@@ -37,15 +38,23 @@ class Database:
 
     def add_post(self, data):
         session = self.maker()
-        post = self._get_or_create(session, models.Post, "id", **data["post_data"])
-        author = self._get_or_create(session, models.Author, "id", **data["author_data"])
+        post, _ = self._get_or_create(session, models.Post, "id", **data["post_data"])
+        author, author_found = self._get_or_create(session, models.Author, "id", **data["author_data"])
         tags = map(
-            lambda tag_data: self._get_or_create(session, models.Tag, "name", **tag_data),
+            lambda tag_data: self._get_or_create(session, models.Tag, "name", **tag_data)[0],
             data["tags_data"],
         )
-        post.author = author
+        if not author_found:
+            post.author = author
         post.tags.extend(tags)
         post.comments.extend(self.add_comments(session, data["comments_data"]))
+        commit_authors = set()
+        commit_authors.add(post.author)
+        for comment in post.comments:
+            if comment.author in commit_authors:
+                comment.author = None
+            else:
+                commit_authors.add(comment.author)
         try:
             session.add(post)
             session.commit()
