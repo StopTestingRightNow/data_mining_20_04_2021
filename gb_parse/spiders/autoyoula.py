@@ -1,5 +1,3 @@
-import re
-
 import pymongo
 import scrapy
 from ..loaders import AutoyoulaLoader
