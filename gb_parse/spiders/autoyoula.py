@@ -2,6 +2,7 @@ import re
 
 import pymongo
 import scrapy
+import base64
 
 
 class AutoyoulaSpider(scrapy.Spider):
@@ -29,6 +30,7 @@ class AutoyoulaSpider(scrapy.Spider):
             ".AdvertCard_descriptionInner__KnuRi::text"
         ).extract_first(),
         "author": lambda resp: AutoyoulaSpider.get_author_id(resp),
+        "phone": lambda resp: AutoyoulaSpider.get_author_phone(resp),
     }
 
     def __init__(self, *args, **kwargs):
@@ -74,8 +76,30 @@ class AutoyoulaSpider(scrapy.Spider):
                 if marker in script.css("::text").extract_first():
                     re_pattern = re.compile(r"youlaId%22%2C%22([a-zA-Z|\d]+)%22%2C%22avatar")
                     result = re.findall(re_pattern, script.css("::text").extract_first())
+                    if not result:
+                        re_pattern = re.compile(r"youlaId%22%2C%22([a-zA-Z|\d]+)%22%2C%22alias")
+                        result = re.findall(re_pattern, script.css("::text").extract_first())
                     return (
                         resp.urljoin(f"/user/{result[0]}").replace("auto.", "", 1)
+                        if result
+                        else None
+                    )
+            except TypeError:
+                pass
+
+    @staticmethod
+    def get_author_phone(resp):
+        marker = "window.transitState = decodeURIComponent"
+        for script in resp.css("script"):
+            try:
+                if marker in script.css("::text").extract_first():
+                    re_pattern = re.compile(
+                        r"phone%22%2C%22([a-zA-Z|%=\d]+)%22%2C%22time"
+                    )
+                    result = re.findall(re_pattern, script.css("::text").extract_first())[0]
+                    phone = base64.b64decode(base64.b64decode(result+'==='))
+                    return (
+                        str(phone, 'utf-8')
                         if result
                         else None
                     )
