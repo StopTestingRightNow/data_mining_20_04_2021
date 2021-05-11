@@ -1,7 +1,7 @@
 import scrapy
 
 from gb_parse.loaders import HHLoader
-from gb_parse.spiders.xpaths import HH_PAGE_XPATH, HH_VACANCY_XPATH
+from gb_parse.spiders.xpaths import HH_PAGE_XPATH, HH_VACANCY_XPATH, HH_COMPANY_XPATH
 
 
 class HhSpider(scrapy.Spider):
@@ -16,7 +16,7 @@ class HhSpider(scrapy.Spider):
             yield response.follow(url, callback=callback)
 
     def parse(self, response):
-        callbacks = {"pagination": self.parse, "vacancy": self.vacancy_parse}
+        callbacks = {"pagination": self.parse, "vacancy": self.vacancy_parse, "company": self.company_parse}
 
         for key, xpath in HH_PAGE_XPATH.items():
             yield from self._get_follow_xpath(response, xpath, callbacks[key])
@@ -30,4 +30,9 @@ class HhSpider(scrapy.Spider):
         yield loader.load_item()
 
     def company_parse(self, response):
-        pass
+        loader = HHLoader(response=response)
+        loader.add_value("url", response.url)
+        for key, xpath in HH_COMPANY_XPATH.items():
+            loader.add_xpath(key, xpath)
+
+        yield loader.load_item()

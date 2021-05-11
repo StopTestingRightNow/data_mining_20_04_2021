@@ -1,6 +1,7 @@
 import pymongo
 import scrapy
 from ..loaders import AutoyoulaLoader
+from gb_parse.spiders.xpaths import AUTO_YOULA_PAGE_XPATH, AUTO_YOULA_BRAND_XPATH, AUTO_YOULA_CAR_XPATH
 
 
 class AutoyoulaSpider(scrapy.Spider):
@@ -8,24 +9,8 @@ class AutoyoulaSpider(scrapy.Spider):
     allowed_domains = ["auto.youla.ru"]
     start_urls = ["https://auto.youla.ru/"]
 
-    _xpath_selectors = {
-        "brands": '//div[@data-target="transport-main-filters"]'
-        '//div[contains(@class,"ColumnItemList_column")]'
-        '//a[@data-target="brand"]/@href',
-        "pagination": '//div[contains(@class, "Paginator_block")]'
-        '//a[@data-target-id="button-link-serp-paginator"]/@href',
-        "car": '//article[@data-target="serp-snippet"]'
-        '//a[@data-target="serp-snippet-title"]/@href',
-    }
-    _xpath_data_selectors = {
-        "title": "//div[@data-target='advert-title']/text()",
-        "price": "//div[@data-target='advert-price']/text()",
-        "photos": "//div[contains(@class, 'PhotoGallery_block')]//figure/picture/img/@src",
-        "characteristics": "//div[contains(@class, 'AdvertCard_specs')]"
-        "/div/div[contains(@class, 'AdvertSpecs_row')]",
-        "description": "//div[@data-target='advert-info-descriptionFull']/text()",
-        "author": '//body/script[contains(text(), "window.transitState = decodeURIComponent")]',
-    }
+    _xpath_selectors = AUTO_YOULA_PAGE_XPATH.update(AUTO_YOULA_BRAND_XPATH)
+    _xpath_data_selectors = AUTO_YOULA_CAR_XPATH
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

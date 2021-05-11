@@ -31,6 +31,8 @@ HH_PAGE_XPATH = {
     "pagination": '//div[@data-qa="pager-block"]//a[@data-qa="pager-page"]/@href',
     "vacancy": '//div[contains(@data-qa, "vacancy-serp__vacancy")]//'
     'a[@data-qa="vacancy-serp__vacancy-title"]/@href',
+    "company": '//div[contains(@data-qa, "vacancy-serp__vacancy")]//'
+    'a[@data-qa="vacancy-serp__vacancy-employer"]/@href',
 }
 
 HH_VACANCY_XPATH = {
@@ -41,4 +43,12 @@ HH_VACANCY_XPATH = {
     'div[contains(@data-qa, "skills-element")]/'
     'span[@data-qa="bloko-tag__text"]/text()',
     "author": '//a[@data-qa="vacancy-company-name"]/@href',
+}
+
+HH_COMPANY_XPATH = {
+    "name": '//div[@class="company-header"]//text()',
+    "site": '//a[@data-qa="sidebar-company-site"]/@href',
+    "subject_fields": '//div[@class="employer-sidebar-block"]'
+                      '/div[text() = "Сферы деятельности"]/following-sibling::p/text()',
+    "description": '//div[@data-qa="company-description"]//text()',
 }
