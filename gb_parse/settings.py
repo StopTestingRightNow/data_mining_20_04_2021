@@ -55,8 +55,8 @@ DEFAULT_REQUEST_HEADERS = {
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
     # 'gb_parse.middlewares.GbParseDownloaderMiddleware': 543,
-    "rotating_proxies.middlewares.RotatingProxyMiddleware": 610,
-    "rotating_proxies.middlewares.BanDetectionMiddleware": 620,
+    # "rotating_proxies.middlewares.RotatingProxyMiddleware": 610,
+    # "rotating_proxies.middlewares.BanDetectionMiddleware": 620,
 }
 
 # Enable or disable extensions
