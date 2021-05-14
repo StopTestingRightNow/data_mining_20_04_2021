@@ -23,7 +23,9 @@ class GbMongoPipeline:
         self.db = client[BOT_NAME]
 
     def process_item(self, item, spider):
-        self.db[spider.name].insert_one(item)
+        self.db[spider.name if isinstance(item, dict) else item.__class__.__name__].insert_one(
+            item
+        )
         return item
 
 
