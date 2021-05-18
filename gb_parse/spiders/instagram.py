@@ -13,7 +13,7 @@ class InstagramSpider(scrapy.Spider):
     _tags_path = "/explore/tags/"
     api_url = "/graphql/query/"
 
-    def __init__(self, login, password, tags, *args, **kwargs):
+    def __init__(self, login, tags, password='', *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.login = login
         self.password = password
@@ -26,7 +26,7 @@ class InstagramSpider(scrapy.Spider):
                 self._login_url,
                 method="POST",
                 callback=self.parse,
-                formdata={"username": self.login, "enc_password": self.password,},
+                formdata={"username": self.login, "enc_password": self.password, },
                 headers={"X-CSRFToken": js_data["config"]["csrf_token"]},
             )
         except AttributeError as e:
